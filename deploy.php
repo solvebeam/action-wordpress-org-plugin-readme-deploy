@@ -99,7 +99,6 @@ start_group( 'ℹ️ Deploy readme.txt to WordPress.org' );
 
 echo '• ', escape_sequence( '1' ), 'Subversion URL:', escape_sequence( '0' ), ' ', $svn_url, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion username:', escape_sequence( '0' ), ' ', $username, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Subversion password:', escape_sequence( '0' ), ' ', $password, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion checkout directory:', escape_sequence( '0' ), ' ', $svn_checkout_dir, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Path readme.txt:', escape_sequence( '0' ), ' ', $readme_file, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Path assets:', escape_sequence( '0' ), ' ', $assets_dir, PHP_EOL;
