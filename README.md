@@ -54,6 +54,12 @@ jobs:
 | `svn-url` | Subversion repository URL of the plugin, for example `https://plugins.svn.wordpress.org/solvebeam-diagrams-with-mermaid`. |
 | `svn-tag-url` | Subversion URL of the deployed tag, for example `https://plugins.svn.wordpress.org/solvebeam-diagrams-with-mermaid/tags/1.0.0`. Empty if `readme.txt` has no `Stable tag`. |
 
+## Job summary
+
+After a successful deploy the action adds a [job summary](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary) to the workflow run, with links to the plugin on WordPress.org, the Subversion repository, Trac and the stable tag, plus a list of the added, modified and removed Subversion paths.
+
+A deploy is essentially a series of shell commands, so the summary also lists every command the action executed, grouped per step. This makes it easier to understand what happens during a deploy, the Subversion password is replaced by `●●●●●●●●`.
+
 ## Inspiration
 
 - https://github.com/marketplace/actions/wordpress-plugin-svn-deploy

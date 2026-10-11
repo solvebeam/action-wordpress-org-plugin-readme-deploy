@@ -16,7 +16,11 @@ function format_error( $value ) {
 }
 
 function run_command( $command ) {
+	global $commands, $group;
+
 	echo format_command( $command ), PHP_EOL;
+
+	$commands[ $group ][] = $command;
 
 	passthru( $command, $result_code );
 
@@ -26,6 +30,10 @@ function run_command( $command ) {
 }
 
 function start_group( $name ) {
+	global $group;
+
+	$group = $name;
+
 	echo '::group::', $name, PHP_EOL;
 }
 
@@ -79,8 +87,29 @@ function set_output( $name, $value ) {
 }
 
 /**
+ * Add job summary.
+ *
+ * @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary
+ * @link https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/
+ * @param string $markdown
+ * @return void
+ */
+function add_job_summary( $markdown ) {
+	$file = getenv( 'GITHUB_STEP_SUMMARY' );
+
+	if ( false === $file || '' === $file ) {
+		return;
+	}
+
+	file_put_contents( $file, $markdown . PHP_EOL, FILE_APPEND );
+}
+
+/**
  * Setup.
  */
+$commands = [];
+$group    = '';
+
 $username = get_required_input( 'username' );
 $password = get_required_input( 'password' );
 
@@ -115,6 +144,7 @@ if ( 1 === preg_match( $pattern, $readme_content, $matches ) ) {
  */
 $public_url  = "https://wordpress.org/plugins/$slug/";
 $svn_tag_url = '' === $stable_tag ? '' : "$svn_url/tags/$stable_tag";
+$trac_url    = "https://plugins.trac.wordpress.org/browser/$slug/";
 
 set_output( 'public-url', $public_url );
 set_output( 'svn-url', $svn_url );
@@ -195,6 +225,8 @@ if ( false === $xml ) {
 	exit( 1 );
 }
 
+$changes = [];
+
 foreach ( $xml->target->entry as $entry ) {
 	$path = (string) $entry['path'];
 
@@ -204,13 +236,19 @@ foreach ( $xml->target->entry as $entry ) {
 		case 'missing':
 			run_command( "svn rm $path" );
 
+			$changes[] = [ '➖ Removed', $path ];
+
 			break;
 		case 'modified':
 			// Modified entry will be commited.
 
+			$changes[] = [ '✏️ Modified', $path ];
+
 			break;
 		case 'unversioned':
 			run_command( "svn add $path" );
+
+			$changes[] = [ '➕ Added', $path ];
 
 			break;
 		default:
@@ -261,3 +299,57 @@ start_group( '🗑️ Clean up' );
 run_command( "rm -f -R $svn_checkout_dir" );
 
 end_group();
+
+/**
+ * Job summary.
+ */
+$summary = [
+	'## Deploy `readme.txt` to WordPress.org',
+	'',
+	"- **Plugin:** [$slug]($public_url)",
+	"- **Subversion:** <$svn_url>",
+	"- **Trac:** <$trac_url>",
+];
+
+if ( '' !== $stable_tag ) {
+	$summary[] = "- **Stable tag:** [$stable_tag]($svn_tag_url)";
+}
+
+$summary[] = '';
+$summary[] = '### Subversion changes';
+$summary[] = '';
+
+if ( [] === $changes ) {
+	$summary[] = 'No changes.';
+} else {
+	$summary[] = '| Status | Path |';
+	$summary[] = '| --- | --- |';
+
+	foreach ( $changes as list( $status, $path ) ) {
+		$summary[] = "| $status | `$path` |";
+	}
+}
+
+$summary[] = '';
+$summary[] = '### Shell commands';
+$summary[] = '';
+$summary[] = 'A deploy is just a series of shell commands, these are the ones this run executed:';
+$summary[] = '';
+$summary[] = '```shell';
+
+foreach ( $commands as $name => $group_commands ) {
+	$summary[] = "# $name";
+
+	foreach ( $group_commands as $command ) {
+		// Never write the Subversion password to the job summary.
+		$summary[] = str_replace( "'$password'", "'●●●●●●●●'", $command );
+	}
+
+	$summary[] = '';
+}
+
+array_pop( $summary );
+
+$summary[] = '```';
+
+add_job_summary( implode( PHP_EOL, $summary ) );
