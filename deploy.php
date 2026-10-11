@@ -13,7 +13,7 @@ use SolveBeam\GitHubActionsToolkit\Style;
  * Functions.
  */
 function run_command( $command ) {
-	global $commands, $group, $core, $shell, $password;
+	global $commands, $group, $core, $shell;
 
 	$commands[ $group ][] = $command;
 
