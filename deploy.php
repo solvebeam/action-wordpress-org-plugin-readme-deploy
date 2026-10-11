@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Autoload.
+ */
+require __DIR__ . '/vendor/autoload.php';
+
+use SolveBeam\GitHubActionsToolkit\Core;
+
+/**
  * Functions.
  */
 function escape_sequence( $code ) {
@@ -27,18 +34,6 @@ function run_command( $command ) {
 	if ( 0 !== $result_code ) {
 		exit( $result_code );
 	}
-}
-
-function start_group( $name ) {
-	global $group;
-
-	$group = $name;
-
-	echo '::group::', $name, PHP_EOL;
-}
-
-function end_group() {
-	echo '::endgroup::', PHP_EOL;
 }
 
 /**
@@ -107,6 +102,8 @@ function add_job_summary( $markdown ) {
 /**
  * Setup.
  */
+$core = new Core();
+
 $commands = [];
 $group    = '';
 
@@ -153,7 +150,9 @@ set_output( 'svn-tag-url', $svn_tag_url );
 /**
  * Start.
  */
-start_group( 'ℹ️ Deploy readme.txt to WordPress.org' );
+$group = 'ℹ️ Deploy readme.txt to WordPress.org';
+
+$core->start_group( $group );
 
 echo '• ', escape_sequence( '1' ), 'Public URL:', escape_sequence( '0' ), ' ', $public_url, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion URL:', escape_sequence( '0' ), ' ', $svn_url, PHP_EOL;
@@ -164,14 +163,16 @@ echo '• ', escape_sequence( '1' ), 'Path readme.txt:', escape_sequence( '0' ),
 echo '• ', escape_sequence( '1' ), 'Path assets:', escape_sequence( '0' ), ' ', $assets_dir, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Stable tag:', escape_sequence( '0' ), ' ', $stable_tag, PHP_EOL;
 
-end_group();
+$core->end_group();
 
 /**
  * Subversion.
  * 
  * @link https://stackoverflow.com/a/122291
  */
-start_group( '⬇ Subversion checkout WordPress.org' );
+$group = '⬇ Subversion checkout WordPress.org';
+
+$core->start_group( $group );
 
 run_command( "svn checkout $svn_url $svn_checkout_dir --depth empty" );
 
@@ -189,12 +190,14 @@ if ( '' !== $stable_tag ) {
 	run_command( "svn update tags/$stable_tag/readme.txt" );
 }
 
-end_group();
+$core->end_group();
 
 /**
  * Synchronize.
  */
-start_group( '🔄 Synchronize' );
+$group = '🔄 Synchronize';
+
+$core->start_group( $group );
 
 run_command( "cp $readme_file trunk/readme.txt" );
 
@@ -206,12 +209,14 @@ if ( is_dir( $assets_dir ) ) {
 	run_command( "rsync --recursive --checksum $assets_dir/ assets/ --delete --delete-excluded" );
 }
 
-end_group();
+$core->end_group();
 
 /**
  * Subversion modifications.
  */
-start_group( '💾 Subversion modifications' );
+$group = '💾 Subversion modifications';
+
+$core->start_group( $group );
 
 run_command( 'svn status' );
 
@@ -258,14 +263,16 @@ foreach ( $xml->target->entry as $entry ) {
 	}
 }
 
-end_group();
+$core->end_group();
 
 /**
  * Fix screenshots getting force downloaded when clicking them.
  * 
  * @link https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
  */
-start_group( '🐛 Fix downloading assets images issue' );
+$group = '🐛 Fix downloading assets images issue';
+
+$core->start_group( $group );
 
 $mime_types = [
 	'png' => 'image/png',
@@ -280,25 +287,29 @@ foreach ( $mime_types as $ext => $type ) {
 	}
 }
 
-end_group();
+$core->end_group();
 
 /**
  * Commit.
  */
-start_group( '⬆ Subversion commit WordPress.org' );
+$group = '⬆ Subversion commit WordPress.org';
+
+$core->start_group( $group );
 
 run_command( "svn commit --message 'Update readme.txt' --non-interactive --username '$username' --password '$password'" );
 
-end_group();
+$core->end_group();
 
 /**
  * Clean up.
  */
-start_group( '🗑️ Clean up' );
+$group = '🗑️ Clean up';
+
+$core->start_group( $group );
 
 run_command( "rm -f -R $svn_checkout_dir" );
 
-end_group();
+$core->end_group();
 
 /**
  * Job summary.

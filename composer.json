@@ -1,0 +1,5 @@
+{
+    "require": {
+        "solvebeam/github-actions-toolkit-php": "dev-main"
+    }
+}

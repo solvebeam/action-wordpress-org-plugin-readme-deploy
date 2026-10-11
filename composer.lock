@@ -1,0 +1,84 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "18b905612d303a9fb0cb0f50638aa206",
+    "packages": [
+        {
+            "name": "solvebeam/github-actions-toolkit-php",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/solvebeam/github-actions-toolkit-php.git",
+                "reference": "4709eaa1290d0790ba863d66268e9ab2d2ecb4cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/solvebeam/github-actions-toolkit-php/zipball/4709eaa1290d0790ba863d66268e9ab2d2ecb4cc",
+                "reference": "4709eaa1290d0790ba863d66268e9ab2d2ecb4cc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.2",
+                "pronamic/wp-coding-standards": "^2.5",
+                "rector/rector": "^2.6"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SolveBeam\\GitHubActionsToolkit\\": "psr-4/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "SolveBeam",
+                    "email": "info@solvebeam.com",
+                    "homepage": "https://www.solvebeam.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Remco Tolsma",
+                    "email": "info@remcotolsma.nl",
+                    "homepage": "https://www.remcotolsma.nl/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP toolkit for developing GitHub Actions.",
+            "homepage": "https://github.com/solvebeam/github-actions-toolkit-php",
+            "keywords": [
+                "actions",
+                "github",
+                "github-actions",
+                "toolkit",
+                "workflow-commands"
+            ],
+            "support": {
+                "issues": "https://github.com/solvebeam/github-actions-toolkit-php/issues",
+                "source": "https://github.com/solvebeam/github-actions-toolkit-php/tree/main"
+            },
+            "time": "2026-10-11T19:02:27+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "solvebeam/github-actions-toolkit-php": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}
