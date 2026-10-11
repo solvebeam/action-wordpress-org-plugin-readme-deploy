@@ -226,10 +226,11 @@ $group = '🐛 Fix downloading assets images issue';
 $core->start_group( $group );
 
 $mime_types = [
-	'png' => 'image/png',
-	'jpg' => 'image/jpeg',
-	'gif' => 'image/gif',
-	'svg' => 'image/svg+xml',
+	'png'  => 'image/png',
+	'jpg'  => 'image/jpeg',
+	'jpeg' => 'image/jpeg',
+	'gif'  => 'image/gif',
+	'svg'  => 'image/svg+xml',
 ];
 
 foreach ( $mime_types as $ext => $type ) {
