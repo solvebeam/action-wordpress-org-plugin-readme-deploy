@@ -6,22 +6,15 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use SolveBeam\GitHubActionsToolkit\Core;
+use SolveBeam\GitHubActionsToolkit\Style;
 
 /**
  * Functions.
  */
-function escape_sequence( $code ) {
-	return "\e[" . $code . 'm';
-}
-
-function format_command( $value ) {
-	return escape_sequence( '36' ) . $value . escape_sequence( '0' );
-}
-
 function run_command( $command ) {
-	global $commands, $group;
+	global $commands, $group, $style;
 
-	echo format_command( $command ), PHP_EOL;
+	echo $style->command( $command ), PHP_EOL;
 
 	$commands[ $group ][] = $command;
 
@@ -53,7 +46,8 @@ function add_job_summary( $markdown ) {
 /**
  * Setup.
  */
-$core = new Core();
+$core  = new Core();
+$style = new Style();
 
 $commands = [];
 $group    = '';
@@ -105,14 +99,14 @@ $group = 'ℹ️ Deploy readme.txt to WordPress.org';
 
 $core->start_group( $group );
 
-echo '• ', escape_sequence( '1' ), 'Public URL:', escape_sequence( '0' ), ' ', $public_url, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Subversion URL:', escape_sequence( '0' ), ' ', $svn_url, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Subversion tag URL:', escape_sequence( '0' ), ' ', $svn_tag_url, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Subversion username:', escape_sequence( '0' ), ' ', $username, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Subversion checkout directory:', escape_sequence( '0' ), ' ', $svn_checkout_dir, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Path readme.txt:', escape_sequence( '0' ), ' ', $readme_file, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Path assets:', escape_sequence( '0' ), ' ', $assets_dir, PHP_EOL;
-echo '• ', escape_sequence( '1' ), 'Stable tag:', escape_sequence( '0' ), ' ', $stable_tag, PHP_EOL;
+echo '• ', $style->bold( 'Public URL:' ), ' ', $public_url, PHP_EOL;
+echo '• ', $style->bold( 'Subversion URL:' ), ' ', $svn_url, PHP_EOL;
+echo '• ', $style->bold( 'Subversion tag URL:' ), ' ', $svn_tag_url, PHP_EOL;
+echo '• ', $style->bold( 'Subversion username:' ), ' ', $username, PHP_EOL;
+echo '• ', $style->bold( 'Subversion checkout directory:' ), ' ', $svn_checkout_dir, PHP_EOL;
+echo '• ', $style->bold( 'Path readme.txt:' ), ' ', $readme_file, PHP_EOL;
+echo '• ', $style->bold( 'Path assets:' ), ' ', $assets_dir, PHP_EOL;
+echo '• ', $style->bold( 'Stable tag:' ), ' ', $stable_tag, PHP_EOL;
 
 $core->end_group();
 
@@ -176,7 +170,7 @@ $output = shell_exec( 'svn status --xml' );
 $xml = simplexml_load_string( $output );
 
 if ( false === $xml ) {
-	echo 'A problem occurred while reading the `svn status --xml`.';
+	$core->error( 'A problem occurred while reading the `svn status --xml`.' );
 
 	exit( 1 );
 }
@@ -208,7 +202,7 @@ foreach ( $xml->target->entry as $entry ) {
 
 			break;
 		default:
-			echo "Unsupport working copy status: $wc_status - $path.";
+			$core->error( "Unsupport working copy status: $wc_status - $path." );
 
 			exit( 1 );
 	}
