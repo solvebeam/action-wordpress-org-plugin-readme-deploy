@@ -10,21 +10,6 @@ use SolveBeam\GitHubActionsToolkit\Shell;
 use SolveBeam\GitHubActionsToolkit\Style;
 
 /**
- * Functions.
- */
-function run_command( $command ) {
-	global $commands, $group, $core, $shell;
-
-	$commands[ $group ][] = $command;
-
-	try {
-		$shell->must_run( $command );
-	} catch ( RuntimeException $e ) {
-		$core->set_failed( $e->getMessage() );
-	}
-}
-
-/**
  * Add job summary.
  *
  * @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary
@@ -48,9 +33,6 @@ function add_job_summary( $markdown ) {
 $core  = new Core();
 $style = new Style();
 $shell = new Shell();
-
-$commands = [];
-$group    = '';
 
 $username = $core->get_required_input( 'username' );
 $password = $core->get_required_input( 'password' );
@@ -95,9 +77,7 @@ $core->set_output( 'svn-tag-url', $svn_tag_url );
 /**
  * Start.
  */
-$group = 'ℹ️ Deploy readme.txt to WordPress.org';
-
-$core->start_group( $group );
+$core->start_group( 'ℹ️ Deploy readme.txt to WordPress.org' );
 
 echo '• ', $style->bold( 'Public URL:' ), ' ', $public_url, PHP_EOL;
 echo '• ', $style->bold( 'Subversion URL:' ), ' ', $svn_url, PHP_EOL;
@@ -110,152 +90,138 @@ echo '• ', $style->bold( 'Stable tag:' ), ' ', $stable_tag, PHP_EOL;
 
 $core->end_group();
 
-/**
- * Subversion.
- * 
- * @link https://stackoverflow.com/a/122291
- */
-$group = '⬇ Subversion checkout WordPress.org';
-
-$core->start_group( $group );
-
-run_command( "svn checkout $svn_url $svn_checkout_dir --depth empty" );
-
-run_command( "cd $svn_checkout_dir" );
-
-chdir( $svn_checkout_dir );
-
-run_command( 'svn update trunk --depth=empty' );
-run_command( 'svn update trunk/readme.txt' );
-run_command( 'svn update assets' );
-
-if ( '' !== $stable_tag ) {
-	run_command( "svn update tags --depth=empty" );
-	run_command( "svn update tags/$stable_tag --depth=empty" );
-	run_command( "svn update tags/$stable_tag/readme.txt" );
-}
-
-$core->end_group();
-
-/**
- * Synchronize.
- */
-$group = '🔄 Synchronize';
-
-$core->start_group( $group );
-
-run_command( "cp $readme_file trunk/readme.txt" );
-
-if ( '' !== $stable_tag ) {
-	run_command( "cp $readme_file tags/$stable_tag/readme.txt" );
-}
-
-if ( is_dir( $assets_dir ) ) {
-	run_command( "rsync --recursive --checksum $assets_dir/ assets/ --delete --delete-excluded" );
-}
-
-$core->end_group();
-
-/**
- * Subversion modifications.
- */
-$group = '💾 Subversion modifications';
-
-$core->start_group( $group );
-
-run_command( 'svn status' );
-
-$output = shell_exec( 'svn status --xml' );
-
-$xml = simplexml_load_string( $output );
-
-if ( false === $xml ) {
-	$core->error( 'A problem occurred while reading the `svn status --xml`.' );
-
-	exit( 1 );
-}
-
 $changes = [];
 
-foreach ( $xml->target->entry as $entry ) {
-	$path = (string) $entry['path'];
+try {
+	/**
+	 * Subversion.
+	 *
+	 * @link https://stackoverflow.com/a/122291
+	 */
+	$core->start_group( '⬇ Subversion checkout WordPress.org' );
 
-	$wc_status = (string) $entry->{'wc-status'}['item'];
+	$shell->must_run( "svn checkout $svn_url $svn_checkout_dir --depth empty" );
 
-	switch ( $wc_status ) {
-		case 'missing':
-			run_command( "svn rm $path" );
+	chdir( $svn_checkout_dir );
 
-			$changes[] = [ '➖ Removed', $path ];
+	$shell->must_run( 'svn update trunk --depth=empty' );
+	$shell->must_run( 'svn update trunk/readme.txt' );
+	$shell->must_run( 'svn update assets' );
 
-			break;
-		case 'modified':
-			// Modified entry will be commited.
-
-			$changes[] = [ '✏️ Modified', $path ];
-
-			break;
-		case 'unversioned':
-			run_command( "svn add $path" );
-
-			$changes[] = [ '➕ Added', $path ];
-
-			break;
-		default:
-			$core->error( "Unsupport working copy status: $wc_status - $path." );
-
-			exit( 1 );
+	if ( '' !== $stable_tag ) {
+		$shell->must_run( "svn update tags --depth=empty" );
+		$shell->must_run( "svn update tags/$stable_tag --depth=empty" );
+		$shell->must_run( "svn update tags/$stable_tag/readme.txt" );
 	}
-}
 
-$core->end_group();
+	$core->end_group();
 
-/**
- * Fix screenshots getting force downloaded when clicking them.
- * 
- * @link https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
- */
-$group = '🐛 Fix downloading assets images issue';
+	/**
+	 * Synchronize.
+	 */
+	$core->start_group( '🔄 Synchronize' );
 
-$core->start_group( $group );
+	$shell->must_run( "cp $readme_file trunk/readme.txt" );
 
-$mime_types = [
-	'png'  => 'image/png',
-	'jpg'  => 'image/jpeg',
-	'jpeg' => 'image/jpeg',
-	'gif'  => 'image/gif',
-	'svg'  => 'image/svg+xml',
-];
-
-foreach ( $mime_types as $ext => $type ) {
-	foreach ( glob( 'assets/*.' . $ext ) as $file ) {
-		run_command( "svn propset svn:mime-type '$type' '$file'" );
+	if ( '' !== $stable_tag ) {
+		$shell->must_run( "cp $readme_file tags/$stable_tag/readme.txt" );
 	}
+
+	if ( is_dir( $assets_dir ) ) {
+		$shell->must_run( "rsync --recursive --checksum $assets_dir/ assets/ --delete --delete-excluded" );
+	}
+
+	$core->end_group();
+
+	/**
+	 * Subversion modifications.
+	 */
+	$core->start_group( '💾 Subversion modifications' );
+
+	$shell->must_run( 'svn status' );
+
+	$output = shell_exec( 'svn status --xml' );
+
+	$xml = simplexml_load_string( $output );
+
+	if ( false === $xml ) {
+		throw new RuntimeException( 'A problem occurred while reading the `svn status --xml`.' );
+	}
+
+	foreach ( $xml->target->entry as $entry ) {
+		$path = (string) $entry['path'];
+
+		$wc_status = (string) $entry->{'wc-status'}['item'];
+
+		switch ( $wc_status ) {
+			case 'missing':
+				$shell->must_run( "svn rm $path" );
+
+				$changes[] = [ '➖ Removed', $path ];
+
+				break;
+			case 'modified':
+				// Modified entry will be commited.
+
+				$changes[] = [ '✏️ Modified', $path ];
+
+				break;
+			case 'unversioned':
+				$shell->must_run( "svn add $path" );
+
+				$changes[] = [ '➕ Added', $path ];
+
+				break;
+			default:
+				throw new RuntimeException( "Unsupport working copy status: $wc_status - $path." );
+		}
+	}
+
+	$core->end_group();
+
+	/**
+	 * Fix screenshots getting force downloaded when clicking them.
+	 *
+	 * @link https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
+	 */
+	$core->start_group( '🐛 Fix downloading assets images issue' );
+
+	$mime_types = [
+		'png'  => 'image/png',
+		'jpg'  => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'gif'  => 'image/gif',
+		'svg'  => 'image/svg+xml',
+	];
+
+	foreach ( $mime_types as $ext => $type ) {
+		foreach ( glob( 'assets/*.' . $ext ) as $file ) {
+			$shell->must_run( "svn propset svn:mime-type '$type' '$file'" );
+		}
+	}
+
+	$core->end_group();
+
+	/**
+	 * Commit.
+	 */
+	$core->start_group( '⬆ Subversion commit WordPress.org' );
+
+	$shell->must_run( "svn commit --message 'Update readme.txt' --non-interactive --username '$username' --password '$password'" );
+
+	$core->end_group();
+
+	/**
+	 * Clean up.
+	 */
+	$core->start_group( '🗑️ Clean up' );
+
+	$shell->must_run( "rm -f -R $svn_checkout_dir" );
+
+	$core->end_group();
+} catch ( RuntimeException $e ) {
+	$core->set_failed( $e->getMessage() );
 }
-
-$core->end_group();
-
-/**
- * Commit.
- */
-$group = '⬆ Subversion commit WordPress.org';
-
-$core->start_group( $group );
-
-run_command( "svn commit --message 'Update readme.txt' --non-interactive --username '$username' --password '$password'" );
-
-$core->end_group();
-
-/**
- * Clean up.
- */
-$group = '🗑️ Clean up';
-
-$core->start_group( $group );
-
-run_command( "rm -f -R $svn_checkout_dir" );
-
-$core->end_group();
 
 /**
  * Job summary.
@@ -286,27 +252,5 @@ if ( [] === $changes ) {
 		$summary[] = "| $status | `$path` |";
 	}
 }
-
-$summary[] = '';
-$summary[] = '### Shell commands';
-$summary[] = '';
-$summary[] = 'A deploy is just a series of shell commands, these are the ones this run executed:';
-$summary[] = '';
-$summary[] = '```shell';
-
-foreach ( $commands as $name => $group_commands ) {
-	$summary[] = "# $name";
-
-	foreach ( $group_commands as $command ) {
-		// Never write the Subversion password to the job summary.
-		$summary[] = str_replace( "'$password'", "'●●●●●●●●'", $command );
-	}
-
-	$summary[] = '';
-}
-
-array_pop( $summary );
-
-$summary[] = '```';
 
 add_job_summary( implode( PHP_EOL, $summary ) );
