@@ -6,22 +6,21 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use SolveBeam\GitHubActionsToolkit\Core;
+use SolveBeam\GitHubActionsToolkit\Shell;
 use SolveBeam\GitHubActionsToolkit\Style;
 
 /**
  * Functions.
  */
 function run_command( $command ) {
-	global $commands, $group, $style;
-
-	echo $style->command( $command ), PHP_EOL;
+	global $commands, $group, $core, $shell, $password;
 
 	$commands[ $group ][] = $command;
 
-	passthru( $command, $result_code );
-
-	if ( 0 !== $result_code ) {
-		exit( $result_code );
+	try {
+		$shell->must_run( $command );
+	} catch ( RuntimeException $e ) {
+		$core->set_failed( $e->getMessage() );
 	}
 }
 
@@ -48,6 +47,7 @@ function add_job_summary( $markdown ) {
  */
 $core  = new Core();
 $style = new Style();
+$shell = new Shell();
 
 $commands = [];
 $group    = '';
