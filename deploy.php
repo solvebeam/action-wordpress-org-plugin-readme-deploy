@@ -61,6 +61,24 @@ function get_required_input( $name ) {
 }
 
 /**
+ * Set output.
+ *
+ * @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-output-parameter
+ * @param string $name
+ * @param string $value
+ * @return void
+ */
+function set_output( $name, $value ) {
+	$file = getenv( 'GITHUB_OUTPUT' );
+
+	if ( false === $file || '' === $file ) {
+		return;
+	}
+
+	file_put_contents( $file, $name . '=' . $value . PHP_EOL, FILE_APPEND );
+}
+
+/**
  * Setup.
  */
 $username = get_required_input( 'username' );
@@ -93,11 +111,23 @@ if ( 1 === preg_match( $pattern, $readme_content, $matches ) ) {
 }
 
 /**
+ * Outputs.
+ */
+$public_url  = "https://wordpress.org/plugins/$slug/";
+$svn_tag_url = '' === $stable_tag ? '' : "$svn_url/tags/$stable_tag";
+
+set_output( 'public-url', $public_url );
+set_output( 'svn-url', $svn_url );
+set_output( 'svn-tag-url', $svn_tag_url );
+
+/**
  * Start.
  */
 start_group( 'ℹ️ Deploy readme.txt to WordPress.org' );
 
+echo '• ', escape_sequence( '1' ), 'Public URL:', escape_sequence( '0' ), ' ', $public_url, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion URL:', escape_sequence( '0' ), ' ', $svn_url, PHP_EOL;
+echo '• ', escape_sequence( '1' ), 'Subversion tag URL:', escape_sequence( '0' ), ' ', $svn_tag_url, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion username:', escape_sequence( '0' ), ' ', $username, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Subversion checkout directory:', escape_sequence( '0' ), ' ', $svn_checkout_dir, PHP_EOL;
 echo '• ', escape_sequence( '1' ), 'Path readme.txt:', escape_sequence( '0' ), ' ', $readme_file, PHP_EOL;

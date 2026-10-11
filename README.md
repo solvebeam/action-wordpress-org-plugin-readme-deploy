@@ -26,7 +26,7 @@ jobs:
 
     environment:
       name: WordPress.org plugin directory
-      url: https://wordpress.org/plugins/solvebeam-diagrams-with-mermaid/
+      url: ${{ steps.deploy.outputs.public-url }}
 
     steps:
       - name: Checkout
@@ -38,12 +38,21 @@ jobs:
             readme.txt
 
       - name: Deploy
+        id: deploy
         uses: solvebeam/action-wordpress-plugin-readme-update@main
         with:
           username: solvebeam
           password: ${{ secrets.SVN_PASSWORD }}
           slug: solvebeam-diagrams-with-mermaid
 ```
+
+## Outputs
+
+| Output | Description |
+| --- | --- |
+| `public-url` | Public URL of the plugin on WordPress.org, for example `https://wordpress.org/plugins/solvebeam-diagrams-with-mermaid/`. |
+| `svn-url` | Subversion repository URL of the plugin, for example `https://plugins.svn.wordpress.org/solvebeam-diagrams-with-mermaid`. |
+| `svn-tag-url` | Subversion URL of the deployed tag, for example `https://plugins.svn.wordpress.org/solvebeam-diagrams-with-mermaid/tags/1.0.0`. Empty if `readme.txt` has no `Stable tag`. |
 
 ## Inspiration
 
