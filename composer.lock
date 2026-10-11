@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/solvebeam/github-actions-toolkit-php.git",
-                "reference": "4709eaa1290d0790ba863d66268e9ab2d2ecb4cc"
+                "reference": "32401426bcb03837724c7f9802ca0eb67d30d819"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/solvebeam/github-actions-toolkit-php/zipball/4709eaa1290d0790ba863d66268e9ab2d2ecb4cc",
-                "reference": "4709eaa1290d0790ba863d66268e9ab2d2ecb4cc",
+                "url": "https://api.github.com/repos/solvebeam/github-actions-toolkit-php/zipball/32401426bcb03837724c7f9802ca0eb67d30d819",
+                "reference": "32401426bcb03837724c7f9802ca0eb67d30d819",
                 "shasum": ""
             },
             "require": {
@@ -67,7 +67,7 @@
                 "issues": "https://github.com/solvebeam/github-actions-toolkit-php/issues",
                 "source": "https://github.com/solvebeam/github-actions-toolkit-php/tree/main"
             },
-            "time": "2026-10-11T19:02:27+00:00"
+            "time": "2026-10-11T20:29:32+00:00"
         }
     ],
     "packages-dev": [],

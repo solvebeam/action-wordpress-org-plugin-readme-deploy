@@ -18,10 +18,6 @@ function format_command( $value ) {
 	return escape_sequence( '36' ) . $value . escape_sequence( '0' );
 }
 
-function format_error( $value ) {
-	return escape_sequence( '31' ) . escape_sequence( '1' ) . 'Error:' . escape_sequence( '0' ) . ' ' . $value;
-}
-
 function run_command( $command ) {
 	global $commands, $group;
 
@@ -34,51 +30,6 @@ function run_command( $command ) {
 	if ( 0 !== $result_code ) {
 		exit( $result_code );
 	}
-}
-
-/**
- * Get input.
- * 
- * @link https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
- * @link https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith
- * @link https://github.com/actions/checkout/blob/cd7d8d697e10461458bc61a30d094dc601a8b017/dist/index.js#L2699-L2717
- * @param string $name
- * @return string|array|false
- */
-function get_input( $name ) {
-	$env_name = 'INPUT_' . strtoupper( $name );
-
-	return getenv( $env_name );
-}
-
-function get_required_input( $name ) {
-	$value = get_input( $name );
-
-	if ( false === $value || '' === $value ) {
-		echo format_error( escape_sequence( '90' ) . 'Input required and not supplied:' . escape_sequence( '0' ) . ' ' . $name );
-
-		exit( 1 );
-	}
-
-	return $value;
-}
-
-/**
- * Set output.
- *
- * @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-output-parameter
- * @param string $name
- * @param string $value
- * @return void
- */
-function set_output( $name, $value ) {
-	$file = getenv( 'GITHUB_OUTPUT' );
-
-	if ( false === $file || '' === $file ) {
-		return;
-	}
-
-	file_put_contents( $file, $name . '=' . $value . PHP_EOL, FILE_APPEND );
 }
 
 /**
@@ -107,10 +58,10 @@ $core = new Core();
 $commands = [];
 $group    = '';
 
-$username = get_required_input( 'username' );
-$password = get_required_input( 'password' );
+$username = $core->get_required_input( 'username' );
+$password = $core->get_required_input( 'password' );
 
-$slug = get_required_input( 'slug' );
+$slug = $core->get_required_input( 'slug' );
 
 $svn_url = "https://plugins.svn.wordpress.org/$slug";
 
@@ -143,9 +94,9 @@ $public_url  = "https://wordpress.org/plugins/$slug/";
 $svn_tag_url = '' === $stable_tag ? '' : "$svn_url/tags/$stable_tag";
 $trac_url    = "https://plugins.trac.wordpress.org/browser/$slug/";
 
-set_output( 'public-url', $public_url );
-set_output( 'svn-url', $svn_url );
-set_output( 'svn-tag-url', $svn_tag_url );
+$core->set_output( 'public-url', $public_url );
+$core->set_output( 'svn-url', $svn_url );
+$core->set_output( 'svn-tag-url', $svn_tag_url );
 
 /**
  * Start.
@@ -317,13 +268,13 @@ $core->end_group();
 $summary = [
 	'## Deploy `readme.txt` to WordPress.org',
 	'',
-	"- **Plugin:** [$slug]($public_url)",
+	"- **Plugin:** <$public_url>",
 	"- **Subversion:** <$svn_url>",
 	"- **Trac:** <$trac_url>",
 ];
 
 if ( '' !== $stable_tag ) {
-	$summary[] = "- **Stable tag:** [$stable_tag]($svn_tag_url)";
+	$summary[] = "- **Stable tag:** <$svn_tag_url>";
 }
 
 $summary[] = '';
