@@ -175,7 +175,7 @@ foreach ( $xml->target->entry as $entry ) {
 			run_command( "svn rm $path" );
 
 			break;
-		case 'modified';
+		case 'modified':
 			// Modified entry will be commited.
 
 			break;
