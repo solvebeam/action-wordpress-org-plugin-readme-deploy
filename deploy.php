@@ -337,6 +337,10 @@ $summary
 	->add_heading( 'Commands', 3 )
 	->add_eol()
 	->add_code_block( implode( PHP_EOL, $commands ), 'shell' )
+	->add_eol()
+	->add_raw( '---', true )
+	->add_eol()
+	->add_raw( '<sub>Deployed with [solvebeam/action-wordpress-org-plugin-readme-deploy](https://github.com/solvebeam/action-wordpress-org-plugin-readme-deploy), built on [solvebeam/github-actions-toolkit-php](https://github.com/solvebeam/github-actions-toolkit-php). Made with ❤️ by [SolveBeam](https://www.solvebeam.com/).</sub>', true )
 	->write();
 
 if ( null !== $error ) {
