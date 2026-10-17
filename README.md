@@ -1,4 +1,4 @@
-# WordPress.org plugin `readme.txt` deploy
+# SolveBeam WordPress.org Plugin Readme Deploy
 
 **Update your plugin page on WordPress.org without shipping a new release.**
 
