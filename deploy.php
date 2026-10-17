@@ -29,6 +29,10 @@ $svn_url = "https://plugins.svn.wordpress.org/$slug";
 $readme_file = getcwd() . '/readme.txt';
 $assets_dir  = getcwd() . '/.wordpress-org';
 
+if ( ! is_file( $readme_file ) ) {
+	$core->set_failed( "The `readme.txt` file could not be found: $readme_file." );
+}
+
 $svn_checkout_dir = tempnam( sys_get_temp_dir(), '' );
 
 unlink( $svn_checkout_dir );
