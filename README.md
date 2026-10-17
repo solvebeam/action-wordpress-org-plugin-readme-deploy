@@ -71,6 +71,10 @@ After every run the action adds a [job summary](https://docs.github.com/en/actio
 
 A deploy is essentially a series of shell commands, so the summary also lists every command the action executed, and in a dry run the skipped commit command. This makes it easier to understand what happens during a deploy, the Subversion password is replaced by `●●●●●●●●`.
 
+## In the wild
+
+- [SolveBeam Diagrams with Mermaid](https://github.com/solvebeam/solvebeam-diagrams-with-mermaid-for-wordpress) — [`.github/workflows/deploy-readme-to-wordpress-org.yml`](https://github.com/solvebeam/solvebeam-diagrams-with-mermaid-for-wordpress/blob/main/.github/workflows/deploy-readme-to-wordpress-org.yml)
+
 ## Inspiration
 
 - https://github.com/marketplace/actions/wordpress-plugin-svn-deploy
