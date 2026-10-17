@@ -223,7 +223,7 @@ try {
 
 				break;
 			default:
-				throw new RuntimeException( "Unsupport working copy status: $wc_status - $path." );
+				throw new RuntimeException( "Unsupported working copy status: $wc_status - $path." );
 		}
 	}
 
