@@ -1,5 +1,5 @@
 {
     "require": {
-        "solvebeam/github-actions-toolkit-php": "dev-main"
+        "solvebeam/github-actions-toolkit-php": "^1.0"
     }
 }

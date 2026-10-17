@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18b905612d303a9fb0cb0f50638aa206",
+    "content-hash": "8b1cfd1dc80c6603d872e6f7adac364e",
     "packages": [
         {
             "name": "solvebeam/github-actions-toolkit-php",
-            "version": "dev-main",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/solvebeam/github-actions-toolkit-php.git",
-                "reference": "592bc4b004b8c5b9edbb1fce6c08caaba170386e"
+                "reference": "26284ba99fde47c7f1a9c9674c660888b3e41a1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/solvebeam/github-actions-toolkit-php/zipball/592bc4b004b8c5b9edbb1fce6c08caaba170386e",
-                "reference": "592bc4b004b8c5b9edbb1fce6c08caaba170386e",
+                "url": "https://api.github.com/repos/solvebeam/github-actions-toolkit-php/zipball/26284ba99fde47c7f1a9c9674c660888b3e41a1b",
+                "reference": "26284ba99fde47c7f1a9c9674c660888b3e41a1b",
                 "shasum": ""
             },
             "require": {
@@ -29,7 +29,6 @@
                 "pronamic/wp-coding-standards": "^2.5",
                 "rector/rector": "^2.6"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -65,17 +64,15 @@
             ],
             "support": {
                 "issues": "https://github.com/solvebeam/github-actions-toolkit-php/issues",
-                "source": "https://github.com/solvebeam/github-actions-toolkit-php/tree/main"
+                "source": "https://github.com/solvebeam/github-actions-toolkit-php/tree/v1.0.0"
             },
-            "time": "2026-10-17T16:22:40+00:00"
+            "time": "2026-10-17T18:20:08+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "solvebeam/github-actions-toolkit-php": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {},
