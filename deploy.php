@@ -207,7 +207,7 @@ try {
 
 				break;
 			case 'modified':
-				// Modified entry will be commited.
+				// Modified entry will be committed.
 
 				$changes[] = [ '✏️ Modified', $path ];
 
