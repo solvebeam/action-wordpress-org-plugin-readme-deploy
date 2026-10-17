@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-17
+
+### Changed
+
+- Rename the action to SolveBeam WordPress.org Plugin Readme Deploy and clarify its description.
+- Capitalize the author name in the action metadata.
+- Use the SolveBeam project name in the README heading.
+
 ## [1.0.0] - 2026-10-17
 
 ### Added
@@ -21,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Job summary with the result, links, Subversion changes and executed commands.
 - Collapsible log groups for every step.
 
-[unreleased]: https://github.com/solvebeam/action-wordpress-org-plugin-readme-deploy/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/solvebeam/action-wordpress-org-plugin-readme-deploy/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/solvebeam/action-wordpress-org-plugin-readme-deploy/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/solvebeam/action-wordpress-org-plugin-readme-deploy/releases/tag/v1.0.0

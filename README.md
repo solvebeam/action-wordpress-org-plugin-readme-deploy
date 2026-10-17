@@ -91,7 +91,7 @@ jobs:
 
 ### Versions
 
-This action follows [Semantic Versioning](https://semver.org/). The `v1` tag always points to the latest `1.x.x` release, so you get fixes and new features without breaking changes. Prefer full control? Pin an exact release such as `@v1.0.0`, or a commit SHA. See the [changelog](CHANGELOG.md) for what changed.
+This action follows [Semantic Versioning](https://semver.org/). The `v1` tag always points to the latest `1.x.x` release, so you get fixes and new features without breaking changes. Prefer full control? Pin an exact release such as `@v1.0.1`, or a commit SHA. See the [changelog](CHANGELOG.md) for what changed.
 
 ### Inputs
 
