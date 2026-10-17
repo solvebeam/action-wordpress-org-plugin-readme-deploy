@@ -8,24 +8,7 @@ require __DIR__ . '/vendor/autoload.php';
 use SolveBeam\GitHubActionsToolkit\Core;
 use SolveBeam\GitHubActionsToolkit\Shell;
 use SolveBeam\GitHubActionsToolkit\Style;
-
-/**
- * Add job summary.
- *
- * @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary
- * @link https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/
- * @param string $markdown
- * @return void
- */
-function add_job_summary( $markdown ) {
-	$file = getenv( 'GITHUB_STEP_SUMMARY' );
-
-	if ( false === $file || '' === $file ) {
-		return;
-	}
-
-	file_put_contents( $file, $markdown . PHP_EOL, FILE_APPEND );
-}
+use SolveBeam\GitHubActionsToolkit\Summary;
 
 /**
  * Setup.
@@ -226,31 +209,34 @@ try {
 /**
  * Job summary.
  */
-$summary = [
-	'## Deploy `readme.txt` to WordPress.org',
-	'',
-	"- **Plugin:** <$public_url>",
-	"- **Subversion:** <$svn_url>",
-	"- **Trac:** <$trac_url>",
-];
+$summary = new Summary();
+
+$summary
+	->add_heading( 'Deploy `readme.txt` to WordPress.org', 2 )
+	->add_eol()
+	->add_raw( "- **Plugin:** <$public_url>", true )
+	->add_raw( "- **Subversion:** <$svn_url>", true )
+	->add_raw( "- **Trac:** <$trac_url>", true );
 
 if ( '' !== $stable_tag ) {
-	$summary[] = "- **Stable tag:** <$svn_tag_url>";
+	$summary->add_raw( "- **Stable tag:** <$svn_tag_url>", true );
 }
 
-$summary[] = '';
-$summary[] = '### Subversion changes';
-$summary[] = '';
+$summary
+	->add_eol()
+	->add_heading( 'Subversion changes', 3 )
+	->add_eol();
 
 if ( [] === $changes ) {
-	$summary[] = 'No changes.';
+	$summary->add_raw( 'No changes.', true );
 } else {
-	$summary[] = '| Status | Path |';
-	$summary[] = '| --- | --- |';
+	$summary
+		->add_raw( '| Status | Path |', true )
+		->add_raw( '| --- | --- |', true );
 
 	foreach ( $changes as list( $status, $path ) ) {
-		$summary[] = "| $status | `$path` |";
+		$summary->add_raw( "| $status | `$path` |", true );
 	}
 }
 
-add_job_summary( implode( PHP_EOL, $summary ) );
+$summary->write();
