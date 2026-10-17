@@ -1,6 +1,6 @@
-name: 'WordPress.org plugin `readme.txt` update'
-description: 'Deploy the `readme.txt` file to the WordPress plugin directory.'
-author: 'solvebeam'
+name: 'SolveBeam WordPress.org Plugin Readme Deploy'
+description: 'Update the readme.txt and assets of your plugin on WordPress.org without a new release. Touches nothing else.'
+author: 'SolveBeam'
 
 branding:
   icon: 'upload-cloud'
