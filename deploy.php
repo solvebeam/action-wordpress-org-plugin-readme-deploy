@@ -22,6 +22,8 @@ $password = $core->get_required_input( 'password' );
 
 $slug = $core->get_required_input( 'slug' );
 
+$dry_run = $core->get_boolean_input( 'dry-run' );
+
 $svn_url = "https://plugins.svn.wordpress.org/$slug";
 
 $readme_file = getcwd() . '/readme.txt';
@@ -70,10 +72,15 @@ echo '• ', $style->bold( 'Subversion checkout directory:' ), ' ', $svn_checkou
 echo '• ', $style->bold( 'Path readme.txt:' ), ' ', $readme_file, PHP_EOL;
 echo '• ', $style->bold( 'Path assets:' ), ' ', $assets_dir, PHP_EOL;
 echo '• ', $style->bold( 'Stable tag:' ), ' ', $stable_tag, PHP_EOL;
+echo '• ', $style->bold( 'Dry run:' ), ' ', $dry_run ? 'yes' : 'no', PHP_EOL;
 
 $core->end_group();
 
 $changes = [];
+
+$commands = [];
+
+$error = null;
 
 try {
 	/**
@@ -83,18 +90,50 @@ try {
 	 */
 	$core->start_group( '⬇ Subversion checkout WordPress.org' );
 
-	$shell->must_run( "svn checkout $svn_url $svn_checkout_dir --depth empty" );
+	$command = "svn checkout $svn_url $svn_checkout_dir --depth empty";
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
 
 	chdir( $svn_checkout_dir );
 
-	$shell->must_run( 'svn update trunk --depth=empty' );
-	$shell->must_run( 'svn update trunk/readme.txt' );
-	$shell->must_run( 'svn update assets' );
+	$command = 'svn update trunk --depth=empty';
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
+
+	$command = 'svn update trunk/readme.txt';
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
+
+	$command = 'svn update assets';
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
 
 	if ( '' !== $stable_tag ) {
-		$shell->must_run( "svn update tags --depth=empty" );
-		$shell->must_run( "svn update tags/$stable_tag --depth=empty" );
-		$shell->must_run( "svn update tags/$stable_tag/readme.txt" );
+		$command = "svn update tags --depth=empty";
+
+		$commands[] = $command;
+
+		$shell->must_run( $command );
+
+		$command = "svn update tags/$stable_tag --depth=empty";
+
+		$commands[] = $command;
+
+		$shell->must_run( $command );
+
+		$command = "svn update tags/$stable_tag/readme.txt";
+
+		$commands[] = $command;
+
+		$shell->must_run( $command );
 	}
 
 	$core->end_group();
@@ -104,14 +143,26 @@ try {
 	 */
 	$core->start_group( '🔄 Synchronize' );
 
-	$shell->must_run( "cp $readme_file trunk/readme.txt" );
+	$command = "cp $readme_file trunk/readme.txt";
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
 
 	if ( '' !== $stable_tag ) {
-		$shell->must_run( "cp $readme_file tags/$stable_tag/readme.txt" );
+		$command = "cp $readme_file tags/$stable_tag/readme.txt";
+
+		$commands[] = $command;
+
+		$shell->must_run( $command );
 	}
 
 	if ( is_dir( $assets_dir ) ) {
-		$shell->must_run( "rsync --recursive --checksum $assets_dir/ assets/ --delete --delete-excluded" );
+		$command = "rsync --recursive --checksum $assets_dir/ assets/ --delete --delete-excluded";
+
+		$commands[] = $command;
+
+		$shell->must_run( $command );
 	}
 
 	$core->end_group();
@@ -121,7 +172,11 @@ try {
 	 */
 	$core->start_group( '💾 Subversion modifications' );
 
-	$shell->must_run( 'svn status' );
+	$command = 'svn status';
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
 
 	$output = shell_exec( 'svn status --xml' );
 
@@ -138,7 +193,11 @@ try {
 
 		switch ( $wc_status ) {
 			case 'missing':
-				$shell->must_run( "svn rm $path" );
+				$command = "svn rm $path";
+
+				$commands[] = $command;
+
+				$shell->must_run( $command );
 
 				$changes[] = [ '➖ Removed', $path ];
 
@@ -150,7 +209,11 @@ try {
 
 				break;
 			case 'unversioned':
-				$shell->must_run( "svn add $path" );
+				$command = "svn add $path";
+
+				$commands[] = $command;
+
+				$shell->must_run( $command );
 
 				$changes[] = [ '➕ Added', $path ];
 
@@ -179,7 +242,11 @@ try {
 
 	foreach ( $mime_types as $ext => $type ) {
 		foreach ( glob( 'assets/*.' . $ext ) as $file ) {
-			$shell->must_run( "svn propset svn:mime-type '$type' '$file'" );
+			$command = "svn propset svn:mime-type '$type' '$file'";
+
+			$commands[] = $command;
+
+			$shell->must_run( $command );
 		}
 	}
 
@@ -190,7 +257,19 @@ try {
 	 */
 	$core->start_group( '⬆ Subversion commit WordPress.org' );
 
-	$shell->must_run( "svn commit --message 'Update readme.txt' --non-interactive --username '$username' --password '$password'" );
+	$command = "svn commit --message 'Update readme.txt' --non-interactive --username '$username' --password '$password'";
+
+	$command_masked = str_replace( $password, '●●●●●●●●', $command );
+
+	if ( $dry_run ) {
+		$shell->skip( $command );
+
+		$commands[] = "# Skipped (dry run): $command_masked";
+	} else {
+		$commands[] = $command_masked;
+
+		$shell->must_run( $command );
+	}
 
 	$core->end_group();
 
@@ -199,20 +278,34 @@ try {
 	 */
 	$core->start_group( '🗑️ Clean up' );
 
-	$shell->must_run( "rm -f -R $svn_checkout_dir" );
+	$command = "rm -f -R $svn_checkout_dir";
+
+	$commands[] = $command;
+
+	$shell->must_run( $command );
 
 	$core->end_group();
 } catch ( RuntimeException $e ) {
-	$core->set_failed( $e->getMessage() );
+	$error = $e->getMessage();
 }
 
 /**
  * Job summary.
+ *
+ * Written before `set_failed()`, because that exits.
  */
+$status = match ( true ) {
+	null !== $error => "❌ Failed: $error",
+	$dry_run        => '🧪 Dry run, nothing committed.',
+	default         => '✅ Deployed.',
+};
+
 $summary = new Summary();
 
 $summary
-	->add_heading( 'Deploy `readme.txt` to WordPress.org', 2 )
+	->add_heading( 'Deploy `readme.txt` to WordPress.org' . ( $dry_run ? ' (dry run)' : '' ), 2 )
+	->add_eol()
+	->add_raw( $status, true )
 	->add_eol()
 	->add_raw( "- **Plugin:** <$public_url>", true )
 	->add_raw( "- **Subversion:** <$svn_url>", true )
@@ -239,4 +332,13 @@ if ( [] === $changes ) {
 	}
 }
 
-$summary->write();
+$summary
+	->add_eol()
+	->add_heading( 'Commands', 3 )
+	->add_eol()
+	->add_code_block( implode( PHP_EOL, $commands ), 'shell' )
+	->write();
+
+if ( null !== $error ) {
+	$core->set_failed( $error );
+}

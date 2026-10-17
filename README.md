@@ -19,6 +19,12 @@ name: Deploy readme.txt to WordPress.org
 
 on:
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run, without committing on WordPress.org'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   deploy:
@@ -44,7 +50,12 @@ jobs:
           username: solvebeam
           password: ${{ secrets.SVN_PASSWORD }}
           slug: solvebeam-diagrams-with-mermaid
+          dry-run: ${{ inputs.dry-run || false }}
 ```
+
+## Dry run
+
+With `dry-run: true` every step and check runs as usual, but the Subversion commit command is only printed, not executed. The job summary then shows which paths would have been added, modified or removed.
 
 ## Outputs
 
@@ -56,9 +67,9 @@ jobs:
 
 ## Job summary
 
-After a successful deploy the action adds a [job summary](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary) to the workflow run, with links to the plugin on WordPress.org, the Subversion repository, Trac and the stable tag, plus a list of the added, modified and removed Subversion paths.
+After every run the action adds a [job summary](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary) to the workflow run, with the result, links to the plugin on WordPress.org, the Subversion repository, Trac and the stable tag, plus a list of the added, modified and removed Subversion paths.
 
-A deploy is essentially a series of shell commands, so the summary also lists every command the action executed, grouped per step. This makes it easier to understand what happens during a deploy, the Subversion password is replaced by `●●●●●●●●`.
+A deploy is essentially a series of shell commands, so the summary also lists every command the action executed, and in a dry run the skipped commit command. This makes it easier to understand what happens during a deploy, the Subversion password is replaced by `●●●●●●●●`.
 
 ## Inspiration
 

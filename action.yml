@@ -27,6 +27,13 @@ inputs:
 
       https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#what-will-my-plugin-permalink-slug-be
     required: true
+  dry-run:
+    description: >
+      Run the deployment without committing in the WordPress.org Subversion repository.
+
+      The commit command is printed but not executed, all other steps and checks run as usual.
+    required: false
+    default: 'false'
 
 outputs:
   public-url:
@@ -59,3 +66,4 @@ runs:
         INPUT_USERNAME: ${{ inputs.username }}
         INPUT_PASSWORD: ${{ inputs.password }}
         INPUT_SLUG: ${{ inputs.slug }}
+        INPUT_DRY-RUN: ${{ inputs.dry-run }}
